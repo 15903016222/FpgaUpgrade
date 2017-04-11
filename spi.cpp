@@ -71,7 +71,7 @@ bool Spi::set_mode(Spi::SpiMode mode)
     return true;
 }
 
-bool Spi::set_bits_per_word(quint8 bits)
+bool Spi::set_bits_per_word(unsigned char bits)
 {
     if (! is_open()) {
         return false;
@@ -85,7 +85,7 @@ bool Spi::set_bits_per_word(quint8 bits)
     return true;
 }
 
-bool Spi::set_speed(quint32 speed)
+bool Spi::set_speed(unsigned int speed)
 {
     if (! is_open()) {
         return false;
@@ -119,7 +119,7 @@ bool Spi::set_lsb_first(bool flag)
     return true;
 }
 
-bool Spi::write(const char *data, quint32 len)
+bool Spi::write(const char *data, unsigned int len)
 {
     if (! is_open() || data == NULL) {
         return false;
@@ -131,12 +131,11 @@ bool Spi::write(const char *data, quint32 len)
 //        if (i%10 == 0 && i != 0 ) {
 //            ::printf("\n%3d: ", i/10);
 //        }
-//        ::printf("%08x ", *(((quint32 *)data)+i));
+//        ::printf("%08x ", *(((unsigned int *)data)+i));
 //    }
 //    ::printf("\nlen=%d\n", len);
 
     ::write(m_fd, data, len);
-
 //    ::sync();
 
 //    struct spi_ioc_transfer xfer;
@@ -148,6 +147,17 @@ bool Spi::write(const char *data, quint32 len)
 //        return false;
 //    }
 //    ::sync();
+
+    return true;
+}
+
+bool Spi::read(char *buff, unsigned int len)
+{
+    if (! is_open() || buff == NULL) {
+        return false;
+    }
+
+    ::read (m_fd, buff, len);
 
     return true;
 }

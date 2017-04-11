@@ -8,7 +8,10 @@
 #ifndef __SPI_H__
 #define __SPI_H__
 
-#include <QTypeInfo>
+//#include <QTypeInfo>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 namespace DplFpga {
 
@@ -44,22 +47,23 @@ public:
     Spi::SpiMode mode() const { return m_mode; }
     bool set_mode(SpiMode mode);
 
-    quint8 bits_per_word() const { return m_bits; }
-    bool set_bits_per_word(quint8 bits);
+    unsigned char bits_per_word() const { return m_bits; }
+    bool set_bits_per_word(unsigned char bits);
 
-    quint32 speed() const { return m_speed; }
-    bool set_speed(quint32 speed);
+    unsigned int speed() const { return m_speed; }
+    bool set_speed(unsigned int speed);
 
     bool is_lsb_first() const { return m_lsbFirst; }
     bool set_lsb_first(bool flag);
 
-    bool write(const char *data, quint32 len);
+    bool write(const char *data, unsigned int len);
+    bool read (char *buff, unsigned int len);
 
 private:
     int m_fd;
     SpiMode m_mode;
-    quint8 m_bits;
-    quint32 m_speed;
+    unsigned char m_bits;
+    unsigned int m_speed;
     bool m_lsbFirst;
 };
 
