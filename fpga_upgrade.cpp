@@ -19,31 +19,37 @@
 #define GPIO101_LOW		0x6008
 #define GPIO101_HIGH	0x6009
 
-#define GPIO109_HIGH    0x8888
+#define GPIO109_LOW    0x8888
+#define GPIO109_HIGH    0x8889
 
 /////////////////////////////////////
 int main (int argc, char *argv[]) {
     int fd_mtd, fd_gpio;
-    int mode, val, res;
+    int mode, res;
+    int val = 0x01;
     char data[1024] = {0};
 
     if ((fd_mtd = open ("/dev/spidev3.1", O_RDWR)) == -1) {
         perror ("/dev/spidev3.1");
     }
-    if ((ioctl(fd_mtd, SPI_IOC_WR_MODE, &mode)) == -1) {
-        perror("can't set spi wr_mode");
-    }
+//    val = (val & 0xfc) | 0x00;
     if ((ioctl(fd_mtd, SPI_IOC_RD_MODE, &mode)) == -1) {
         perror("can't get spi rd_mode");
+    }
+//    val = (val & 0xfc) | 0x00;
+    if ((ioctl(fd_mtd, SPI_IOC_WR_MODE, &mode)) == -1) {
+        perror("can't set spi wr_mode");
     }
     if( (fd_gpio = open("/dev/tt", O_RDWR)) == -1 )
     {
         perror("/dev/tt");
     }
-    printf ("LED ON ... \n");
+
+    printf ("LEN ON ... \n");
     while (1) {
         ioctl(fd_gpio, GPIO109_HIGH, &val);
     }
+
     ioctl(fd_gpio, GPIO99_HIGH, &val);
     ioctl(fd_gpio, GPIO100_HIGH, &val);
     ioctl(fd_gpio, GPIO101_HIGH, &val);
@@ -57,6 +63,57 @@ int main (int argc, char *argv[]) {
 
     return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
