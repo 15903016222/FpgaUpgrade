@@ -2,5 +2,6 @@
 
 make
 
-scp fpga_upgrade root@192.168.1.233:/home/root
+arm-angstrom-linux-gnueabi-g++ fpga_upgrade.cpp -o fpga_upgrade
+arm-angstrom-linux-gnueabi-gcc one_register.c   -o one_register
 

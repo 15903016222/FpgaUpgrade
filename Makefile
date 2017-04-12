@@ -1,8 +1,6 @@
-fpga_upgrade:fpga_upgrade.o spi.o
-	arm-angstrom-linux-gnueabi-g++ fpga_upgrade.o spi.o -o fpga_upgrade
-fpga_upgrade.o:fpga_upgrade.cpp
-	arm-angstrom-linux-gnueabi-g++ -c fpga_upgrade.cpp
-spi.o:spi.cpp
-	arm-angstrom-linux-gnueabi-g++ -c spi.cpp
+obj-m += gpio.o
+obj-m += one_register_modu.o
+all:
+	make -C /home/ws/project/phascan-mini/linux SUBDIRS=$(PWD) modules
 clean:
-	rm *.o fpga_upgrade
+	make -C /home/ws/project/phascan-mini/linux SUBDIRS=$(PWD) clean 
