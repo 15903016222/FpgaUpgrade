@@ -12,15 +12,20 @@
 #include <linux/spi/spidev.h>
 #include <stdio.h>
 
-#define GPIO99_LOW     0x6004
+#define GPIO99_LOW      0x6004
 #define GPIO99_HIGH		0x6005
 #define GPIO100_LOW		0x6006
 #define GPIO100_HIGH	0x6007
 #define GPIO101_LOW		0x6008
 #define GPIO101_HIGH	0x6009
+#define GPIO170_LOW     0x6010
+#define GPIO170_HIGH    0x6011
+#define GPIO170_INPUT   0x6012
 
-#define GPIO109_LOW    0x8888
+#define GPIO109_LOW     0x8888
 #define GPIO109_HIGH    0x8889
+
+#define GPIO_READ       0x1000
 
 /////////////////////////////////////
 int main (int argc, char *argv[]) {
@@ -40,19 +45,47 @@ int main (int argc, char *argv[]) {
     if ((ioctl(fd_mtd, SPI_IOC_WR_MODE, &mode)) == -1) {
         perror("can't set spi wr_mode");
     }
-    if( (fd_gpio = open("/dev/tt", O_RDWR)) == -1 )
+    if( (fd_gpio = open("/dev/gpiodrv", O_RDWR)) == -1 )
     {
         perror("/dev/tt");
     }
-
-    printf ("LEN ON ... \n");
-    while (1) {
-        ioctl(fd_gpio, GPIO109_HIGH, &val);
-    }
-
+/*
     ioctl(fd_gpio, GPIO99_HIGH, &val);
     ioctl(fd_gpio, GPIO100_HIGH, &val);
     ioctl(fd_gpio, GPIO101_HIGH, &val);
+    ioctl(fd_gpio, GPIO109_HIGH, &val);
+    sleep (2);
+    ioctl(fd_gpio, GPIO_READ, &val);
+    sleep (2);
+    ioctl(fd_gpio, GPIO99_LOW, &val);
+    ioctl(fd_gpio, GPIO100_HIGH, &val);
+    ioctl(fd_gpio, GPIO101_LOW, &val);
+    ioctl(fd_gpio, GPIO109_HIGH, &val);
+    sleep (2);
+    ioctl(fd_gpio, GPIO_READ, &val);
+    sleep (2);
+    ioctl(fd_gpio, GPIO99_HIGH, &val);
+    ioctl(fd_gpio, GPIO100_LOW, &val);
+    ioctl(fd_gpio, GPIO101_HIGH, &val);
+    ioctl(fd_gpio, GPIO109_LOW, &val);
+    sleep (2);
+    ioctl(fd_gpio, GPIO_READ, &val);
+
+    printf ("gpio170 is ... \n");
+    ioctl(fd_gpio, GPIO170_HIGH, &val);
+    ioctl(fd_gpio, GPIO_READ, &val);
+
+    printf ("gpio set over ... \n");
+*/
+    printf ("gpio170 input ... \n");
+    ioctl(fd_gpio, GPIO170_INPUT, &val);
+    getchar ();
+    ioctl(fd_gpio, GPIO170_HIGH, &val);
+    ioctl(fd_gpio, GPIO_READ, &val);
+    printf ("gpio set over ... \n");
+
+while (1);
+
     memset (data, 'A', 1024);
     printf ("开始传输数据 data = %c ... ...\n", data[0]);
     while (1) {
