@@ -116,3 +116,6 @@ all.config
 # QT project
 *.pro
 *.pro.user
+*.sh
+one*
+Makefile

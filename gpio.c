@@ -66,7 +66,7 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
             gpio_direction_output (99, 0);
             gpio_set_value (99, 1);
             gpio_free (99);
-            iounremap (void *data);
+            iounmap ((void *)data);
             printk ("gpio99 is set 1 over ... \n");
             break;
 
@@ -78,7 +78,7 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
             gpio_direction_output (99, 0);
             gpio_set_value (99, 0);
             gpio_free (99);
-            iounremap (void *data);
+            iounmap ((void *)data);
             printk ("gpio99 is set 0 over ... \n");
             break;
 /*
