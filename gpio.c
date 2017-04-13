@@ -55,18 +55,33 @@
 static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
 {
     int val = 0;
+    unsigned int data;
 
     switch (cmd) {
         case GPIO99_HIGH:
             printk ("set gpio99 1 \n");
+            data = (unsigned int)ioremap (0x48002114, 4);
+            *(unsigned int *)data |= 1 << 19 | 1 << 20 | 1 << 24;
+            gpio_request (99, "spi_en");
+            gpio_direction_output (99, 0);
             gpio_set_value (99, 1);
-            break;
-/*
-        case GPIO99_LOW:
-            printk ("set gpio99 0 \n");
-            gpio_set_value (99, 0);
+            gpio_free (99);
+            iounremap (void *data);
+            printk ("gpio99 is set 1 over ... \n");
             break;
 
+        case GPIO99_LOW:
+            printk ("set gpio99 0 \n");
+            data = (unsigned int)ioremap (0x48002114, 4);
+            *(unsigned int *)data |= 1 << 19 | 1 << 20 | 1 << 24;
+            gpio_request (99, "spi_en");
+            gpio_direction_output (99, 0);
+            gpio_set_value (99, 0);
+            gpio_free (99);
+            iounremap (void *data);
+            printk ("gpio99 is set 0 over ... \n");
+            break;
+/*
         case GPIO100_HIGH:
             printk ("set gpio100 1 \n");
             gpio_set_value (100, 1);
@@ -191,7 +206,7 @@ static struct miscdevice gpio_misc = {
 
 int __init omap_gpio_init(void)
 {
-    unsigned int data;
+/*    unsigned int data;
 
     printk ("gpio99 is setting ... \n");
     data = (unsigned int)ioremap (0x48002114, 4);
@@ -201,7 +216,6 @@ int __init omap_gpio_init(void)
     gpio_set_value (99, 1);
     printk ("gpio99 is set over ... \n");
 
-/*
     gpio_request (100, "cam_d1");
     gpio_direction_output (100, 0);
     gpio_request (101, "cam_d2");
@@ -233,8 +247,7 @@ int __init omap_gpio_init(void)
 
 void __exit omap_gpio_exit(void)
 {
-    gpio_free (99);
-/*
+/*    gpio_free (99);
     gpio_free (100);
     gpio_free (101);
     gpio_free (109);

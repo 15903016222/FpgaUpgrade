@@ -14,27 +14,7 @@
 
 #define GPIO99_LOW      0x6004
 #define GPIO99_HIGH		0x6005
-/*
-#define GPIO100_LOW		0x6006
-#define GPIO100_HIGH	0x6007
-#define GPIO101_LOW		0x6008
-#define GPIO101_HIGH	0x6009
-#define GPIO170_LOW     0x6010
-#define GPIO170_HIGH    0x6011
-#define GPIO170_INPUT   0x6012
-#define GPIO184_LOW     0x6013
-#define GPIO184_HIGH    0x6014
-#define GPIO185_LOW     0x6015
-#define GPIO185_HIGH    0x6016
-#define GPIO158_LOW     0x6017
-#define GPIO158_HIGH    0x6018
 
-#define GPIO109_LOW     0x8888
-#define GPIO109_HIGH    0x8889
-
-#define GPIO_READ       0x1000
-*/
-/////////////////////////////////////
 int main (int argc, char *argv[]) {
     int fd_mtd, fd_gpio;
     int mode, res;
@@ -54,59 +34,13 @@ int main (int argc, char *argv[]) {
     }
     if( (fd_gpio = open("/dev/gpiodrv", O_RDWR)) == -1 )
     {
-        perror("/dev/tt");
+        perror("/dev/gpiodrv");
     }
 
     printf ("gpio158 set 1 ... \n");
     ioctl(fd_gpio, GPIO99_HIGH, &val);
     printf ("gpio158 set 1 over ... \n");
 
-/*    printf ("gpio 99h 100h 101h 109h 170h \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO99_HIGH, &val);
-    ioctl(fd_gpio, GPIO100_HIGH, &val);
-    ioctl(fd_gpio, GPIO101_HIGH, &val);
-    ioctl(fd_gpio, GPIO109_HIGH, &val);
-    ioctl(fd_gpio, GPIO170_HIGH, &val);
-    printf ("read gpio 99 100 101 109 170 \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO_READ, &val);
-    printf ("gpio 99L 100h 101L 109h \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO99_LOW, &val);
-    ioctl(fd_gpio, GPIO100_HIGH, &val);
-    ioctl(fd_gpio, GPIO101_LOW, &val);
-    ioctl(fd_gpio, GPIO109_HIGH, &val);
-    printf ("read gpio 99 100 101 109 170 \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO_READ, &val);
-    printf ("gpio 99h 100L 101h 109L \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO99_HIGH, &val);
-    ioctl(fd_gpio, GPIO100_LOW, &val);
-    ioctl(fd_gpio, GPIO101_HIGH, &val);
-    ioctl(fd_gpio, GPIO109_LOW, &val);
-    printf ("read gpio 99 100 101 109 170 \n");
-    getchar();
-    ioctl(fd_gpio, GPIO_READ, &val);
-    printf ("gpio 170h 109L \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO170_HIGH, &val);
-    ioctl(fd_gpio, GPIO109_LOW, &val);
-    printf ("read gpio 99 100 101 109 170 \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO_READ, &val);
-    printf ("gpio170 input ... \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO170_INPUT, &val);
-    printf ("gpio 170h \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO170_HIGH, &val);
-    printf ("read gpio 99 100 101 109 170 \n");
-    getchar ();
-    ioctl(fd_gpio, GPIO_READ, &val);
-    printf ("gpio set over ... \n");
-*/
     memset (data, 'A', 1024);
     printf ("开始传输数据 data = %c ... ...\n", data[0]);
     while (1) {
