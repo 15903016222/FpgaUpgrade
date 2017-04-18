@@ -81,6 +81,32 @@ static struct miscdevice gpio_misc = {
 
 int __init omap_gpio_init(void)
 {
+    unsigned int data;
+/*    printk ("gpio14/15 mcspi3_simo/mcspi3_somi set mode1 \n");
+    data = (unsigned int)ioremap (0x480025dc, 4);
+    *(unsigned int *)data |= 1 << 1 | 1 << 17;
+    iounmap ((void *)data);
+    printk ("gpio17 mcspi3clkl set mode1 \n");
+    data = (unsigned int)ioremap (0x480025e0, 4);
+    *(unsigned int *)data |= 1 << 17;
+    iounmap ((void *)data);
+    printk ("gpio23 mcspi3_cs1 set mode1 \n");
+    data = (unsigned int)ioremap (0x480025e8, 4);
+    *(unsigned int *)data |= 1 << 17;
+    iounmap ((void *)data);
+    printk ("gpio109 led set mode4 \n");
+    data = (unsigned int)ioremap (0x48002128, 4);
+//    *(unsigned int *)data |= 1 << 19 | 1 << 20 | 1 << 24;
+    printk ("gpio109 CONTROL_PADCONF_CAM_D9[31:16] = 0x%x \n", *(unsigned int *)data);
+    *(unsigned int *)data = 0x00000100;
+    *(unsigned int *)data |= 1 << 18 | 1 << 19;
+    gpio_request (109, "led");
+    gpio_direction_output (109, 0);
+    gpio_set_value (109, 1);
+    gpio_free (109);
+    iounmap ((void *)data);
+    printk ("gpio14/15/17/23 is set \n");
+*/
 	misc_register (&gpio_misc);
     printk ("char device gpio register successed. \n");
 
