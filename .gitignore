@@ -118,4 +118,5 @@ all.config
 *.pro.user
 *.sh
 one*
+fpga_upgrade
 Makefile
