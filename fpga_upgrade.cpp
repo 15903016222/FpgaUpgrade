@@ -120,34 +120,6 @@ int main (int argc, char *argv[]) {
         close (fd_mtd);
         return -1;
     }
-/*
-    if (!strncmp("no", argv[1], 2)) {
-        printf ("No pull up/down ... \n");
-        while (1) {
-            printf ("Please input enter to set GPIO109/GPIO21 HIGH \n");
-            getchar();
-            ioctl(fd_tt, GPIO109_HIGH, &val);
-            ioctl(fd_tt, GPIO21_HIGH, &val);
-            printf ("Please input enter to set GPIO109/GPIO21 LOW \n");
-            getchar();
-            ioctl(fd_tt, GPIO109_LOW, &val);
-            ioctl(fd_tt, GPIO21_LOW, &val);
-        }
-    }
-    else if (!strncmp("pull", argv[1], 4)) {
-        printf ("Pull up/down ... \n");
-        while (1) {
-            printf ("Please input enter to set GPIO109/GPIO21 HIGH \n");
-            getchar();
-            ioctl(fd_tt, GPIO109_HIGH_PULL, &val);
-            ioctl(fd_tt, GPIO21_HIGH_PULL, &val);
-            printf ("Please input enter to set GPIO109/GPIO21 LOW \n");
-            getchar();
-            ioctl(fd_tt, GPIO109_LOW_PULL, &val);
-            ioctl(fd_tt, GPIO21_LOW_PULL, &val);
-        }
-    }
-*/
 
     printf ("gpio99 set 1 ... \n");
     ioctl(fd_tt, GPIO99_HIGH, &val);
@@ -155,7 +127,7 @@ int main (int argc, char *argv[]) {
 
     uint8_t cmd;
 
-while (1) {
+    // read RDID
     cmd = RDID;
     printf ("set gpio21 1 \n");
     ioctl(fd_tt, GPIO21_HIGH, &val);
@@ -177,7 +149,61 @@ while (1) {
     }
     printf ("ID : tmp[0] = %.2x tmp[1] = %.2x tmp[2] = %.2x \n", tmp[0], tmp[1], tmp[2]);
     ioctl(fd_tt, GPIO21_HIGH, &val);
-}
+
+    // read RDSR
+    cmd = RDSR;
+    printf ("set gpio21 1 \n");
+    ioctl(fd_tt, GPIO21_HIGH, &val);
+    delay (20000);
+    ioctl(fd_tt, GPIO21_LOW, &val);
+
+    printf ("RDSR: cmd = %.2x \n", cmd);
+    if ((size = write (fd_mtd, &cmd, sizeof (cmd))) < 0) {
+        perror ("Write RDSR");
+        close (fd_mtd);
+        return -1;
+    }
+
+    uint8_t tmp1[256] = {0,};
+    if ((size = read (fd_mtd, tmp1, sizeof (tmp1))) < 0) {
+        perror ("read RDSR");
+        close (fd_mtd);
+        return -1;
+    }
+    int i, j;
+    printf ("RDSR: \n");
+    for (i = 0; i < 16; i++) {
+        for (j = 0; j < 16; j ++) {
+            printf ("%.2x ", tmp1[16 * i + j]);
+        }
+        printf ("\n");
+    }
+
+    // BE
+    cmd = WREN;
+    ioctl(fd_tt, GPIO21_HIGH, &val);
+    delay (20000);
+    ioctl(fd_tt, GPIO21_LOW, &val);
+
+    printf ("WREN: cmd = %.2x \n", cmd);
+    if ((size = write (fd_mtd, &cmd, sizeof (cmd))) < 0) {
+        perror ("Write WREN");
+        close (fd_mtd);
+        return -1;
+    }
+
+    cmd = BE;
+    ioctl(fd_tt, GPIO21_HIGH, &val);
+    delay (20000);
+    ioctl(fd_tt, GPIO21_LOW, &val);
+
+    printf ("BE: cmd = %.2x \n", cmd);
+    if ((size = write (fd_mtd, &cmd, sizeof (cmd))) < 0) {
+        perror ("Write BE");
+        close (fd_mtd);
+        return -1;
+    }
+    ioctl(fd_tt, GPIO21_HIGH, &val);
 
     return 0;
 }
