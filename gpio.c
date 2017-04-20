@@ -39,6 +39,9 @@
 #define GPIO109_HIGH_PULL 0x6010
 #define GPIO109_LOW_PULL  0x6011
 
+#define GPIO21_HIGH_PULL 0x6012
+#define GPIO21_LOW_PULL  0x6013
+
 #define CONTROL_PADCONF_CAM_D9  0x48002128
 #define GPIO4_OE                0x49054034
 #define GPIO4_DATAOUT           0x4905403c
@@ -78,6 +81,12 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
             *(unsigned int *)data &= 0xffff;
             *((unsigned int *)data) |= 1 << 18 | 1 << 19 | 1 << 20;
             iounmap ((void *)data);
+            data = (unsigned int)ioremap (GPIO4_OE, 4);
+            *((unsigned int *)data) |= (1 << 13);
+            iounmap ((void *)data);
+            data = (unsigned int)ioremap (GPIO4_DATAOUT, 4);
+            *((unsigned int *)data) &= ~(1 << 13);
+            iounmap ((void *)data);
             break;
 
         case GPIO109_LOW_PULL:
@@ -105,20 +114,41 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
 
         case GPIO21_HIGH:
             printk ("set gpio21 1 \n");
-            data = (unsigned int)ioremap (0x480025e8, 4);
-            *(unsigned int *)data = 1 << 18 | 1 << 19 | 1 << 20;
+            data = (unsigned int)ioremap (CONTROL_PADCONF_ETK_D6, 4);
+            *(unsigned int *)data &= 0xffff;
+            *(unsigned int *)data |= 1 << 18;
             iounmap ((void *)data);
-            data = 0;
-            printk ("gpio21 is set 1 over ... \n");
+            data = (unsigned int)ioremap (GPIO1_OE, 4);
+            *((unsigned int *)data) &= ~(1 << 21);
+            iounmap ((void *)data);
+            data = (unsigned int)ioremap (GPIO1_DATAOUT, 4);
+            *((unsigned int *)data) |= 1 << 21;
+            iounmap ((void *)data);
             break;
 
         case GPIO21_LOW:
             printk ("set gpio21 0 \n");
-            data = (unsigned int)ioremap (0x480025e8, 4);
-            *(unsigned int *)data &= ~(1 << 19 | 1 << 20);
+            data = (unsigned int)ioremap (GPIO1_DATAOUT, 4);
+            *((unsigned int *)data) &= ~(1 << 21);
             iounmap ((void *)data);
-            data = 0;
-            printk ("gpio21 is set 0 over ... \n");
+            break;
+
+        case GPIO21_HIGH_PULL:
+            data = (unsigned int)ioremap (CONTROL_PADCONF_ETK_D6, 4);
+            *(unsigned int *)data &= 0xffff;
+            *((unsigned int *)data) |= 1 << 18 | 1 << 19 | 1 << 20;
+            iounmap ((void *)data);
+            data = (unsigned int)ioremap (GPIO4_OE, 4);
+            *((unsigned int *)data) |= (1 << 21);
+            iounmap ((void *)data);
+            data = (unsigned int)ioremap (GPIO4_DATAOUT, 4);
+            *((unsigned int *)data) &= ~(1 << 21);
+            iounmap ((void *)data);
+            break;
+
+        case GPIO21_LOW_PULL:
+            data = (unsigned int)ioremap (CONTROL_PADCONF_ETK_D6, 4);
+            *((unsigned int *)data) &= ~(1 << 18 | 1 << 19 | 1 << 20);
             break;
 
         default:

@@ -32,6 +32,9 @@
 #define GPIO109_HIGH_PULL 0x6010
 #define GPIO109_LOW_PULL  0x6011
 
+#define GPIO21_HIGH_PULL 0x6012
+#define GPIO21_LOW_PULL  0x6013
+
 #define SOFT_WARE_SIZE  (1024)
 
 #define WREN    0x06
@@ -117,44 +120,46 @@ int main (int argc, char *argv[]) {
         close (fd_mtd);
         return -1;
     }
-
+/*
     if (!strncmp("no", argv[1], 2)) {
         printf ("No pull up/down ... \n");
         while (1) {
-            printf ("Please input enter to set GPIO109 HIGH \n");
+            printf ("Please input enter to set GPIO109/GPIO21 HIGH \n");
             getchar();
             ioctl(fd_tt, GPIO109_HIGH, &val);
-            printf ("Please input enter to set GPIO109 LOW \n");
+            ioctl(fd_tt, GPIO21_HIGH, &val);
+            printf ("Please input enter to set GPIO109/GPIO21 LOW \n");
             getchar();
             ioctl(fd_tt, GPIO109_LOW, &val);
+            ioctl(fd_tt, GPIO21_LOW, &val);
         }
     }
     else if (!strncmp("pull", argv[1], 4)) {
         printf ("Pull up/down ... \n");
         while (1) {
-            printf ("Please input enter to set GPIO109 HIGH \n");
+            printf ("Please input enter to set GPIO109/GPIO21 HIGH \n");
             getchar();
             ioctl(fd_tt, GPIO109_HIGH_PULL, &val);
-            printf ("Please input enter to set GPIO109 LOW \n");
+            ioctl(fd_tt, GPIO21_HIGH_PULL, &val);
+            printf ("Please input enter to set GPIO109/GPIO21 LOW \n");
             getchar();
             ioctl(fd_tt, GPIO109_LOW_PULL, &val);
+            ioctl(fd_tt, GPIO21_LOW_PULL, &val);
         }
     }
+*/
 
+    printf ("gpio99 set 1 ... \n");
+    ioctl(fd_tt, GPIO99_HIGH, &val);
+    printf ("gpio99 set 1 over ... \n");
 
-    //printf ("gpio99 set 1 ... \n");
-    //ioctl(fd_tt, GPIO99_HIGH, &val);
-    //printf ("gpio99 set 1 over ... \n");
-/*
     uint8_t cmd;
 
 while (1) {
     cmd = RDID;
     printf ("set gpio21 1 \n");
-    getchar();
     ioctl(fd_tt, GPIO21_HIGH, &val);
-    printf ("set gpio21 0 \n");
-    getchar();
+    delay (20000);
     ioctl(fd_tt, GPIO21_LOW, &val);
 
     printf ("RDID: cmd = %.2x \n", cmd);
@@ -170,9 +175,10 @@ while (1) {
         close (fd_mtd);
         return -1;
     }
-
+    printf ("ID : tmp[0] = %.2x tmp[1] = %.2x tmp[2] = %.2x \n", tmp[0], tmp[1], tmp[2]);
+    ioctl(fd_tt, GPIO21_HIGH, &val);
 }
-*/
+
     return 0;
 }
 
