@@ -39,9 +39,13 @@
 #define GPIO109_HIGH_PULL 0x6010
 #define GPIO109_LOW_PULL  0x6011
 
-#define CONTROL_PADCONF_CAM_D9 0x48002128
-#define GPIO4_OE               0x49054034
-#define GPIO4_DATAOUT          0x4095303c
+#define CONTROL_PADCONF_CAM_D9  0x48002128
+#define GPIO4_OE                0x49054034
+#define GPIO4_DATAOUT           0x4905403c
+
+#define CONTROL_PADCONF_ETK_D6  0x480025e8
+#define GPIO1_OE                0x48310034
+#define GPIO1_DATAOUT           0x4831003c
 
 static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
 {
@@ -71,6 +75,7 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
 
         case GPIO109_HIGH_PULL:
             data = (unsigned int)ioremap (CONTROL_PADCONF_CAM_D9, 4);
+            *(unsigned int *)data &= 0xffff;
             *((unsigned int *)data) |= 1 << 18 | 1 << 19 | 1 << 20;
             iounmap ((void *)data);
             break;

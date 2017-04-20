@@ -27,6 +27,11 @@
 #define GPIO21_LOW      0x6006
 #define GPIO21_HIGH     0x6007
 
+#define GPIO109_HIGH    0x6008
+#define GPIO109_LOW     0x6009
+#define GPIO109_HIGH_PULL 0x6010
+#define GPIO109_LOW_PULL  0x6011
+
 #define SOFT_WARE_SIZE  (1024)
 
 #define WREN    0x06
@@ -113,23 +118,45 @@ int main (int argc, char *argv[]) {
         return -1;
     }
 
+    if (!strncmp("no", argv[1], 2)) {
+        printf ("No pull up/down ... \n");
+        while (1) {
+            printf ("Please input enter to set GPIO109 HIGH \n");
+            getchar();
+            ioctl(fd_tt, GPIO109_HIGH, &val);
+            printf ("Please input enter to set GPIO109 LOW \n");
+            getchar();
+            ioctl(fd_tt, GPIO109_LOW, &val);
+        }
+    }
+    else if (!strncmp("pull", argv[1], 4)) {
+        printf ("Pull up/down ... \n");
+        while (1) {
+            printf ("Please input enter to set GPIO109 HIGH \n");
+            getchar();
+            ioctl(fd_tt, GPIO109_HIGH_PULL, &val);
+            printf ("Please input enter to set GPIO109 LOW \n");
+            getchar();
+            ioctl(fd_tt, GPIO109_LOW_PULL, &val);
+        }
+    }
+
+
     //printf ("gpio99 set 1 ... \n");
     //ioctl(fd_tt, GPIO99_HIGH, &val);
     //printf ("gpio99 set 1 over ... \n");
-
+/*
     uint8_t cmd;
-
-    /* read id */
 
 while (1) {
     cmd = RDID;
-/*    printf ("set gpio21 1 \n");
+    printf ("set gpio21 1 \n");
     getchar();
     ioctl(fd_tt, GPIO21_HIGH, &val);
     printf ("set gpio21 0 \n");
     getchar();
     ioctl(fd_tt, GPIO21_LOW, &val);
-*/
+
     printf ("RDID: cmd = %.2x \n", cmd);
     if ((size = write (fd_mtd, &cmd, sizeof (cmd))) < 0) {
         perror ("Write RDID");
@@ -137,63 +164,14 @@ while (1) {
         return -1;
     }
 
-/*    uint8_t tmp[3] = {0,};
+    uint8_t tmp[3] = {0,};
     if ((size = read (fd_mtd, &tmp, sizeof (tmp))) < 0) {
         perror ("read id");
         close (fd_mtd);
         return -1;
     }
-*/
-//    delay(5);
-//    ioctl(fd_tt, GPIO21_HIGH, &val);
 
- //   printf ("ID: tmp = %.2x \n", tmp[0]);
 }
-
-/*    // 写使能
-    cmd = WREN;   // RDID
-    printf ("WREN: cmd = %.2x ... ...\n", cmd);
-
-    if ((size = write (fd_mtd, &cmd, sizeof (cmd))) < 0) {
-        perror ("Write enable");
-        close (fd_mtd);
-        return -1;
-    }
-
-    // 发送pp
-    cmd = PP;
-    printf ("PP: cmd = %.2x ... ...\n", cmd);
-
-    if ((size = write (fd_mtd, &cmd, sizeof (cmd))) < 0) {
-        perror ("Spi PP");
-        close (fd_mtd);
-        return -1;
-    }
-
-    // 发送地址
-    int addr = 0;
-    printf ("write addr \n");
-
-    if ((size = write (fd_mtd, &addr, sizeof (addr))) < 0) {
-        perror ("Spi data addr");
-        close (fd_mtd);
-        return -1;
-    }
-
-    // 发送数据
-int i = 0;
-for (i = 0; i < 65536; ++i) {
-    unsigned int tmp[256] = {0,};
-    printf ("write tmp[0] = %d to spi \n", tmp[0]);
-
-    if ((size = write (fd_mtd, &tmp, sizeof (tmp))) < 0) {
-        perror ("Spi tmp");
-        close (fd_mtd);
-        return -1;
-    }
-    delay (10000);
-}
-    printf ("Data transfer is over \n");
 */
     return 0;
 }
