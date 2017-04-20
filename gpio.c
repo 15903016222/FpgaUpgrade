@@ -31,6 +31,17 @@
 
 #define GPIO99_LOW      0x6004
 #define GPIO99_HIGH     0x6005
+#define GPIO21_LOW      0x6006
+#define GPIO21_HIGH     0x6007
+
+#define GPIO109_HIGH    0x6008
+#define GPIO109_LOW     0x6009
+#define GPIO109_HIGH_PULL 0x6010
+#define GPIO109_LOW_PULL  0x6011
+
+#define CONTROL_PADCONF_CAM_D9 0x48002128
+#define GPIO4_OE               0x49054034
+#define GPIO4_DATAOUT          0x4095303c
 
 static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
 {
@@ -38,29 +49,73 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
     unsigned int data;
 
     switch (cmd) {
+        case GPIO109_HIGH:
+            printk ("set gpio109 led on \n");
+            data = (unsigned int)ioremap (CONTROL_PADCONF_CAM_D9, 4);
+            *(unsigned int *)data &= 0xffff;
+            *(unsigned int *)data |= 1 << 18;
+            iounmap ((void *)data);
+            data = (unsigned int)ioremap (GPIO4_OE, 4);
+            *((unsigned int *)data) &= ~(1 << 13);
+            iounmap ((void *)data);
+            data = (unsigned int)ioremap (GPIO4_DATAOUT, 4);
+            *((unsigned int *)data) |= 1 << 13;
+            iounmap ((void *)data);
+            break;
+
+        case GPIO109_LOW:
+            data = (unsigned int)ioremap (GPIO4_DATAOUT, 4);
+            *((unsigned int *)data) &= ~(1 << 13);
+            iounmap ((void *)data);
+            break;
+
+        case GPIO109_HIGH_PULL:
+            data = (unsigned int)ioremap (CONTROL_PADCONF_CAM_D9, 4);
+            *((unsigned int *)data) |= 1 << 18 | 1 << 19 | 1 << 20;
+            iounmap ((void *)data);
+            break;
+
+        case GPIO109_LOW_PULL:
+            data = (unsigned int)ioremap (CONTROL_PADCONF_CAM_D9, 4);
+            *((unsigned int *)data) &= ~(1 << 18 | 1 << 19 | 1 << 20);
+            break;
+
         case GPIO99_HIGH:
             printk ("set gpio99 1 \n");
             data = (unsigned int)ioremap (0x48002114, 4);
-            *(unsigned int *)data |= 1 << 19 | 1 << 20 | 1 << 24;
-            gpio_request (99, "spi_en");
-            gpio_direction_output (99, 0);
-            gpio_set_value (99, 1);
-            gpio_free (99);
+            *(unsigned int *)data = 1 << 18 | 1 << 19 | 1 << 20;
             iounmap ((void *)data);
+            data = 0;
             printk ("gpio99 is set 1 over ... \n");
             break;
 
         case GPIO99_LOW:
             printk ("set gpio99 0 \n");
             data = (unsigned int)ioremap (0x48002114, 4);
-            *(unsigned int *)data |= 1 << 19 | 1 << 20 | 1 << 24;
-            gpio_request (99, "spi_en");
-            gpio_direction_output (99, 0);
-            gpio_set_value (99, 0);
-            gpio_free (99);
+            *(unsigned int *)data &= ~(1 << 18 | 1 << 19 | 1 << 20);
             iounmap ((void *)data);
+            data = 0;
             printk ("gpio99 is set 0 over ... \n");
             break;
+
+        case GPIO21_HIGH:
+            printk ("set gpio21 1 \n");
+            data = (unsigned int)ioremap (0x480025e8, 4);
+            *(unsigned int *)data = 1 << 18 | 1 << 19 | 1 << 20;
+            iounmap ((void *)data);
+            data = 0;
+            printk ("gpio21 is set 1 over ... \n");
+            break;
+
+        case GPIO21_LOW:
+            printk ("set gpio21 0 \n");
+            data = (unsigned int)ioremap (0x480025e8, 4);
+            *(unsigned int *)data &= ~(1 << 19 | 1 << 20);
+            iounmap ((void *)data);
+            data = 0;
+            printk ("gpio21 is set 0 over ... \n");
+            break;
+
         default:
             break;
     }
@@ -81,33 +136,7 @@ static struct miscdevice gpio_misc = {
 
 int __init omap_gpio_init(void)
 {
-    unsigned int data;
-/*    printk ("gpio14/15 mcspi3_simo/mcspi3_somi set mode1 \n");
-    data = (unsigned int)ioremap (0x480025dc, 4);
-    *(unsigned int *)data |= 1 << 1 | 1 << 17;
-    iounmap ((void *)data);
-    printk ("gpio17 mcspi3clkl set mode1 \n");
-    data = (unsigned int)ioremap (0x480025e0, 4);
-    *(unsigned int *)data |= 1 << 17;
-    iounmap ((void *)data);
-    printk ("gpio23 mcspi3_cs1 set mode1 \n");
-    data = (unsigned int)ioremap (0x480025e8, 4);
-    *(unsigned int *)data |= 1 << 17;
-    iounmap ((void *)data);
-    printk ("gpio109 led set mode4 \n");
-    data = (unsigned int)ioremap (0x48002128, 4);
-//    *(unsigned int *)data |= 1 << 19 | 1 << 20 | 1 << 24;
-    printk ("gpio109 CONTROL_PADCONF_CAM_D9[31:16] = 0x%x \n", *(unsigned int *)data);
-    *(unsigned int *)data = 0x00000100;
-    *(unsigned int *)data |= 1 << 18 | 1 << 19;
-    gpio_request (109, "led");
-    gpio_direction_output (109, 0);
-    gpio_set_value (109, 1);
-    gpio_free (109);
-    iounmap ((void *)data);
-    printk ("gpio14/15/17/23 is set \n");
-*/
-	misc_register (&gpio_misc);
+    misc_register (&gpio_misc);
     printk ("char device gpio register successed. \n");
 
     return 0;
@@ -115,7 +144,7 @@ int __init omap_gpio_init(void)
 
 void __exit omap_gpio_exit(void)
 {
-	misc_deregister (&gpio_misc);
+    misc_deregister (&gpio_misc);
     printk ("char device gpio unregister. \n");
 
     return;

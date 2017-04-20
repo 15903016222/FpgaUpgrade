@@ -24,6 +24,8 @@
 
 #define GPIO99_LOW      0x6004
 #define GPIO99_HIGH		0x6005
+#define GPIO21_LOW      0x6006
+#define GPIO21_HIGH     0x6007
 
 #define SOFT_WARE_SIZE  (1024)
 
@@ -60,7 +62,7 @@ int main (int argc, char *argv[]) {
 
     static uint8_t mode;
     static uint8_t bits = 8;
-    static uint32_t speed = 5000000;
+    static uint32_t speed = 300000;
 
     if ((fd_mtd = open ("/dev/spidev3.1", O_RDWR)) == -1) {
         perror ("/dev/spidev3.1");
@@ -111,10 +113,9 @@ int main (int argc, char *argv[]) {
         return -1;
     }
 
-    printf ("gpio99 set 1 ... \n");
-    ioctl(fd_tt, GPIO99_HIGH, &val);
-    close (fd_tt);
-    printf ("gpio99 set 1 over ... \n");
+    //printf ("gpio99 set 1 ... \n");
+    //ioctl(fd_tt, GPIO99_HIGH, &val);
+    //printf ("gpio99 set 1 over ... \n");
 
     uint8_t cmd;
 
@@ -122,6 +123,13 @@ int main (int argc, char *argv[]) {
 
 while (1) {
     cmd = RDID;
+/*    printf ("set gpio21 1 \n");
+    getchar();
+    ioctl(fd_tt, GPIO21_HIGH, &val);
+    printf ("set gpio21 0 \n");
+    getchar();
+    ioctl(fd_tt, GPIO21_LOW, &val);
+*/
     printf ("RDID: cmd = %.2x \n", cmd);
     if ((size = write (fd_mtd, &cmd, sizeof (cmd))) < 0) {
         perror ("Write RDID");
@@ -129,13 +137,17 @@ while (1) {
         return -1;
     }
 
-    uint8_t tmp[3] = {0,};
+/*    uint8_t tmp[3] = {0,};
     if ((size = read (fd_mtd, &tmp, sizeof (tmp))) < 0) {
         perror ("read id");
         close (fd_mtd);
         return -1;
     }
-    printf ("ID: tmp = %.2x \n", tmp[0]);
+*/
+//    delay(5);
+//    ioctl(fd_tt, GPIO21_HIGH, &val);
+
+ //   printf ("ID: tmp = %.2x \n", tmp[0]);
 }
 
 /*    // 写使能
