@@ -1,0 +1,17 @@
+Partition Merge Status : Successful - Thu Jan 19 15:44:55 2017
+Quartus Prime Version : 16.1.0 Build 196 10/24/2016 SJ Standard Edition
+Revision Name : Phascan
+Top-level Entity Name : top
+Family : Arria V
+Logic utilization (in ALMs) : 20,557 / 71,700 ( 29 % )
+Total registers : 21853
+Total pins : 190 / 468 ( 41 % )
+Total virtual pins : 0
+Total block memory bits : 6,003,849 / 12,083,200 ( 50 % )
+Total DSP Blocks : 192 / 600 ( 32 % )
+Total HSSI RX PCSs : 0 / 18 ( 0 % )
+Total HSSI PMA RX Deserializers : 0 / 18 ( 0 % )
+Total HSSI TX PCSs : 0 / 18 ( 0 % )
+Total HSSI PMA TX Serializers : 0 / 18 ( 0 % )
+Total PLLs : 3 / 30 ( 10 % )
+Total DLLs : 0 / 4 ( 0 % )

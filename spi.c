@@ -254,7 +254,7 @@ int  spi_pp (int fd, unsigned int address, char *data, size_t size) {
         close (fd);
         return -1;
     }
-    printf ("H8: %.2x \n", addr);
+
     // M8
     addr = address >> 8;
     if ((write (fd, &addr, sizeof (addr))) < 0) {
@@ -262,7 +262,7 @@ int  spi_pp (int fd, unsigned int address, char *data, size_t size) {
         close (fd);
         return -1;
     }
-    printf ("M8: %.2x \n", addr);
+
     // L8
     addr = address;
     if ((write (fd, &addr, sizeof (addr))) < 0) {
@@ -270,7 +270,6 @@ int  spi_pp (int fd, unsigned int address, char *data, size_t size) {
         close (fd);
         return -1;
     }
-    printf ("L8: %.2x \n", addr);
 
     if ((write (fd, data, size)) < 0) {
         perror ("Write data");

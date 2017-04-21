@@ -66,10 +66,152 @@ int spi_mode (void) {
 int main (int argc, char *argv[]) {
     int i, j;
 
+    int fd_file;
+    size_t size = 0;
+    size_t tmp = 0;
+    char buff[256] = {0};
+
     spi_mode();
 
     // RDID
     spi_cs_low (fd_tt);
+    char id[3] = {0,};
+    spi_rdid (fd_mtd, id, sizeof (id));
+    spi_cs_high(fd_tt);
+    if (id[0] != 0x20) {
+        printf ("No found SPI FLASH. \n");
+        return -1;
+    }
+    printf ("ID:id = %.2x %.2x %.2x \n", id[0], id[1], id[2]);
+
+    // BE
+    spi_cs_low(fd_tt);
+    spi_wren(fd_mtd);
+    spi_cs_high(fd_tt);
+    spi_cs_low(fd_tt);
+    spi_be(fd_mtd);
+    spi_cs_high(fd_tt);
+
+    // RDSR
+    while (1) {
+        spi_cs_low (fd_tt);
+        unsigned char status;
+        spi_rdsr(fd_mtd, &status);
+        spi_cs_high(fd_tt);
+            printf ("RDSR: status = %.2x \n", status);
+        if (!(status | 0x0)) {
+            break;
+        }
+        else {
+            sleep (5);
+            continue;
+        }
+    }
+
+    // file operation
+    fd_file = open (argv[1], O_RDONLY);
+    if (fd_file < 0) {
+        perror ("open");
+        return -1;
+    }
+    size = lseek(fd_file, 0, SEEK_END);
+    if (size < 0) {
+        return -1;
+    }
+    lseek(fd_file, 0, SEEK_SET);
+
+    printf ("file: size = %d \n", size);
+
+    tmp = size;
+    int count = 0;
+    while (tmp / 256) {
+        memset (buff, 0, 256);
+        if (read (fd_file, buff, 256) < 0) {
+            perror ("read");
+            return -1;
+        }
+
+        // RDSR
+        while (1) {
+            spi_cs_low (fd_tt);
+            unsigned char status;
+            spi_rdsr(fd_mtd, &status);
+            spi_cs_high(fd_tt);
+//            printf ("RDSR: status = %.2x \n", status);
+            if (!(status | 0x0)) {
+                break;
+            }
+            else {
+                sleep (5);
+                continue;
+            }
+        }
+
+        // PP
+        spi_cs_low(fd_tt);
+        spi_wren(fd_mtd);
+        spi_cs_high(fd_tt);
+        spi_cs_low(fd_tt);
+        spi_pp(fd_mtd, 256 * count, buff, 256);
+        spi_cs_high(fd_tt);
+
+        ++count;
+        tmp -= 256;
+    }
+
+    tmp = size % 256;
+    if (tmp <= 0) {
+        return 0;
+    }
+    memset (buff, 0, 256);
+    if (read (fd_file, buff, tmp) < 0) {
+        perror ("read");
+        return -1;
+    }
+
+    // RDSR
+    while (1) {
+        spi_cs_low (fd_tt);
+        unsigned char status;
+        spi_rdsr(fd_mtd, &status);
+        spi_cs_high(fd_tt);
+//            printf ("RDSR: status = %.2x \n", status);
+        if (!(status | 0x0)) {
+            break;
+        }
+        else {
+            sleep (5);
+            continue;
+        }
+    }
+
+    // PP
+    spi_cs_low(fd_tt);
+    spi_wren(fd_mtd);
+    spi_cs_high(fd_tt);
+    spi_cs_low(fd_tt);
+    spi_pp(fd_mtd, 256 * count, buff, 256);
+    spi_cs_high(fd_tt);
+
+    // RDSR
+    while (1) {
+        spi_cs_low (fd_tt);
+        unsigned char status;
+        spi_rdsr(fd_mtd, &status);
+        spi_cs_high(fd_tt);
+//            printf ("RDSR: status = %.2x \n", status);
+        if (!(status | 0x0)) {
+            break;
+        }
+        else {
+            sleep (5);
+            continue;
+        }
+    }
+
+
+    // RDID
+/*    spi_cs_low (fd_tt);
     char id[3] = {0,};
     spi_rdid (fd_mtd, id, sizeof (id));
     spi_cs_high(fd_tt);
@@ -81,7 +223,7 @@ int main (int argc, char *argv[]) {
     spi_rdsr(fd_mtd, &status);
     spi_cs_high(fd_tt);
     printf ("RDSR: status = %.2x \n", status);
-
+*/
     // SE
 /*    spi_cs_low(fd_tt);
     spi_wren(fd_mtd);
@@ -147,7 +289,7 @@ int main (int argc, char *argv[]) {
     printf ("RDSR is OVER ... \n");
 */
     // READ
-    spi_cs_low (fd_tt);
+ /*   spi_cs_low (fd_tt);
     char read_data[1024] = {0};
     spi_read(fd_mtd, 0x0, read_data, sizeof (read_data));
     spi_cs_high(fd_tt);
@@ -158,6 +300,6 @@ int main (int argc, char *argv[]) {
         }
         printf ("\n");
     }
-
+*/
     return 0;
 }
