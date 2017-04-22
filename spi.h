@@ -37,17 +37,29 @@
 #define GPIO21_LOW      0x6006
 #define GPIO21_HIGH     0x6007
 
-extern void delay (int m);
-extern void pabort (const char *s);
-extern int  spi_rdid (int fd, char *id, size_t size);
-extern int  spi_rdsr (int fd, char *status);
-extern int  spi_wrsr (int fd, uint8_t reg);\
-extern int  spi_wren (int fd);
-extern int  spi_se (int fd, unsigned int address);
-extern int  spi_be (int fd);
-extern int  spi_read (int fd, unsigned int address, char *data, size_t size);
-extern int  spi_pp (int fd, unsigned int address, char *data, size_t size);
-extern int  spi_cs_low (int fd);
-extern int  spi_cs_high (int fd);
+extern int fd_spi, fd_cs;
+
+extern int  spi_open (const char *path);
+extern int  spi_set_mode (uint8_t mode);
+extern int  spi_set_bits (uint8_t bits);
+extern int  spi_set_speed (uint32_t speed);
+extern void spi_close (void);
+
+extern int  spi_rdid (char *id, size_t size);
+extern int  spi_rdsr ( char *status);
+extern int  spi_wrsr (uint8_t reg);\
+extern int  spi_wren (void);
+extern int  spi_se (unsigned int address);
+extern int  spi_be (void);
+extern int  spi_read (unsigned int address, char *data, size_t size);
+extern int  spi_pp (unsigned int address, char *data, size_t size);
+
+extern int  spi_write (unsigned int address, char *data, size_t size);
+extern int  spi_is_busy (void);
+
+extern int  spi_cs_open (const char *path);
+extern int  spi_cs_low (void);
+extern int  spi_cs_high (void);
+extern void spi_cs_close (void);
 
 #endif //__SPI_H
