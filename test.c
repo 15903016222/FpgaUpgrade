@@ -85,24 +85,28 @@ int main (int argc, char *argv[]) {
     spi_rdsr(&status);
     printf ("RDSR: status = %.2x \n", status);
 
+
     // SE
-/*    spi_cs_low();
-    spi_wren();
-    spi_cs_high();
-    spi_cs_low();
-    spi_se(0x300);
-    spi_cs_high();
-*/
+//    spi_se(0x300);
+
     // BE
-/*    spi_cs_low();
-    spi_wren();
-    spi_cs_high();
-    spi_cs_low();
     spi_be();
-    spi_cs_high();
-*/
+
+    // RDSR
+    while (1) {
+
+        if (!spi_is_busy()) {
+            break;
+        }
+        else {
+            printf ("RDSR: status is busy \n");
+            sleep (5);
+            continue;
+        }
+    }
+
     // PP
-    char write_data[256] = {0};
+/*    char write_data[256] = {0};
 
     for (i = 0; i < 256; ++i) {
         write_data[i] = i % 256;
@@ -115,42 +119,55 @@ int main (int argc, char *argv[]) {
         printf ("\n");
     }
 
-    spi_cs_low();
-    spi_wren();
-    spi_cs_high();
-    spi_cs_low();
     spi_pp(0x200, write_data, 256);
-    spi_cs_high();
+*/
+
+    // BP
+    char write_data[1024 + 256] = {0};
+
+    for (i = 0; i < 1024 + 256; ++i) {
+        write_data[i] = i % 256;
+    }
+    printf ("write_data: \n");
+    for (i = 0; i < 40; ++i) {
+        for (j = 0; j < 32; ++j) {
+            printf ("%.2x ", write_data[i * 32 + j]);
+        }
+        printf ("\n");
+        if (i == 32)
+        {
+            printf ("\n");
+        }
+    }
+
+    spi_write(0x0, write_data, 1024 + 128);
 
     // RDSR
     while (1) {
-        spi_cs_low ();
-        unsigned char status;
-        spi_rdsr(&status);
-        spi_cs_high();
-        printf ("RDSR: status = %.2x \n", status);
 
-        if (!(status & 0x0)) {
+        if (!spi_is_busy()) {
             break;
         }
         else {
-            printf ("waiting ... \n");
+            printf ("RDSR: status is busy \n");
             sleep (5);
             continue;
         }
     }
 
     // READ
-    spi_cs_low ();
-    char read_data[1024] = {0};
+    char read_data[2048] = {0};
     spi_read(0x0, read_data, sizeof (read_data));
-    spi_cs_high();
     printf ("READ: \n");
-    for (i = 0; i < 32; ++i) {
+    for (i = 0; i < 64; ++i) {
         for (j = 0; j < 32; ++j) {
             printf ("%.2x ", read_data[32 * i + j]);
         }
         printf ("\n");
+        if (i == 31)
+        {
+            printf ("\n");
+        }
     }
 
     return 0;

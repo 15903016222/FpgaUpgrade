@@ -189,32 +189,6 @@ int  spi_rdsr (char *status)
     return res;
 }
 
-int  spi_wrsr (uint8_t reg)
-{
-    if (fd_spi < 0)
-    {
-        return -1;
-    }
-
-    int res;
-    uint8_t cmd = WRSR;
-    uint8_t status = reg;
-
-    spi_cs_low();
-    if ((res = write (fd_spi, &cmd, sizeof (cmd))) < 0)
-    {
-        return -1;
-    }
-
-    if ((res = write (fd_spi, &status, sizeof (status))) < 0)
-    {
-        return -1;
-    }
-    spi_cs_high();
-
-    return res;
-}
-
 int  spi_wren (void)
 {
     if (fd_spi < 0)
@@ -235,6 +209,33 @@ int  spi_wren (void)
     return res;
 }
 
+int  spi_wrsr (uint8_t reg)
+{
+    if (fd_spi < 0)
+    {
+        return -1;
+    }
+
+    int res;
+    uint8_t cmd = WRSR;
+    uint8_t status = reg;
+
+    spi_wren();
+    spi_cs_low();
+    if ((res = write (fd_spi, &cmd, sizeof (cmd))) < 0)
+    {
+        return -1;
+    }
+
+    if ((res = write (fd_spi, &status, sizeof (status))) < 0)
+    {
+        return -1;
+    }
+    spi_cs_high();
+
+    return res;
+}
+
 int  spi_se (unsigned int address)
 {
     if (fd_spi < 0)
@@ -245,6 +246,7 @@ int  spi_se (unsigned int address)
     int res;
     uint8_t cmd = SE;
 
+    spi_wren();
     spi_cs_low();
     if ((res = write (fd_spi, &cmd, sizeof (cmd))) < 0)
     {
@@ -285,6 +287,7 @@ int  spi_be (void)
     int res;
     uint8_t cmd = BE;
 
+    spi_wren();
     spi_cs_low();
     if ((res = write (fd_spi, &cmd, sizeof (cmd))) < 0)
     {
@@ -359,6 +362,7 @@ int  spi_pp (unsigned int address, char *data, size_t size)
     uint8_t cmd = PP;
     uint8_t addr;
 
+    spi_wren();
     spi_cs_low();
     if ((res = write (fd_spi, &cmd, sizeof (cmd))) < 0)
     {
@@ -436,6 +440,6 @@ int  spi_is_busy (void)
         return -1;
     }
 
-    return status & 0x0;
+    return status & 0x01;
 }
 
