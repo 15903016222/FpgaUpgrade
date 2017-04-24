@@ -81,6 +81,7 @@ int  spi_set_speed (uint32_t speed)
 void spi_close (void)
 {
     close (fd_spi);
+    close (fd_tt);
 }
 
 int spi_cs_open (const char *path)

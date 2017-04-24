@@ -69,28 +69,70 @@ int main (int argc, char *argv[]) {
     printf ("ID:id = %.2x %.2x %.2x \n", id[0], id[1], id[2]);
 
     // READ
-    fd_file = open(argv[1], O_RDWR | O_CREAT);
+    fd_file = open(argv[1], O_RDWR);
     if (fd_file < 0)
     {
         perror ("open file");
         return -1;
     }
+    size = lseek (fd_file, 0, SEEK_END);
+    lseek (fd_file, 0, SEEK_SET);
 
     char read_data[SIZE] = {0};
-    size = 0x01000000;
-
+    char file_data[SIZE] = {0};
+    unsigned int addr = 0;
     while (size / SIZE)
     {
         memset (read_data, 0, SIZE);
         memset (file_data, 0, SIZE);
         res = spi_read(addr, read_data, sizeof (read_data));
 
-        write (fd_file, read_data, res);
+        lseek (fd_file, addr, SEEK_SET);
+        read (fd_file, file_data, res);
+        if (memcmp(file_data, read_data, SIZE))
+        {
+            int i, j;
+            printf ("spi_data: \n");
+            for (i = 0; i < 128; i++)
+            {
+                for (j = 0; j < 32; j++)
+                {
+                    printf ("%.2x ", read_data[32 * i + j]);
+                }
+                printf ("\n");
+                if (i % 32 == 31)
+                {
+                    printf ("\n");
+                }
+            }
+            printf ("file_data: \n");
+            for (i = 0; i < 128; i++)
+            {
+                for (j = 0; j < 32; j++)
+                {
+                    printf ("%.2x ", file_data[32 * i + j]);
+                }
+                printf ("\n");
+                if (i % 32 == 31)
+                {
+                    printf ("\n");
+                }
+            }
+
+            printf ("addr = 0x%08x size/SIZE Not same ... \n", addr);
+            close (fd_file);
+            spi_close ();
+            spi_cs_close();
+            return -1;
+        }
         size -= res;
         addr += res;
         if (addr % res)
         {
             printf ("size/SIZE no read SIZE ... \n");
+            close (fd_file);
+            spi_close ();
+            spi_cs_close();
             return -1;
         }
     }
@@ -100,14 +142,23 @@ int main (int argc, char *argv[]) {
         memset (file_data, 0, SIZE);
         res = spi_read(addr, read_data, size % SIZE);
 
-        write (fd_file, read_data, res);
+        lseek (fd_file, addr, SEEK_SET);
+        read (fd_file, file_data, res);
+        if (memcmp(file_data, read_data, SIZE))
+        {
+            printf ("addr = 0x%08x size%SIZE Not same ... \n", addr);
+            close (fd_file);
+            spi_close ();
+            spi_cs_close();
+            return -1;
+        }
         size -= res;
         addr += res;
     }
-    printf ("Read from spi ,write to file over ... \n");
+    printf ("Same ... \n");
     close (fd_file);
     spi_close ();
-    spi_cs_close ();
+    spi_cs_close();
 
     return 0;
 }

@@ -1,6 +1,6 @@
 #include "spi.h"
 
-#define SIZE 4096
+#define SIZE (4096 * 32)
 
 int spi_mode (void) {
     int fd_mtd, fd_tt;
@@ -84,7 +84,7 @@ void spi_wait_ready (void)
         else
         {
             printf ("spi is busy ... \n");
-            sleep (5);
+            sleep (1);
             continue;
         }
     }
@@ -103,7 +103,7 @@ int main (int argc, char *argv[])
     spi_mode();
 
     fd_file = file_operate (argv[1], &size);
-    if (fd_file)
+    if (fd_file < 0)
     {
         perror ("file_operate");
         return -1;
@@ -122,6 +122,9 @@ int main (int argc, char *argv[])
     spi_wait_ready();
     // BE
     spi_be();
+    printf ("file size is %d \n", size);
+    spi_wait_ready();
+    printf ("spi_be is over ... \n");
 
     tmp = size;
     while (tmp / SIZE)
@@ -138,8 +141,8 @@ int main (int argc, char *argv[])
         res = spi_write(addr, buff, res);
         addr += res;
         tmp  -= res;
+        printf ("tmp = %d, addr = %d \n", tmp, addr);
     }
-
     while (tmp % SIZE != 0)
     {
         memset (buff, 0, SIZE);
@@ -154,9 +157,13 @@ int main (int argc, char *argv[])
         res = spi_write(addr, buff, res);
         addr += res;
         tmp  -= res;
+        printf ("tmp = %d, addr = %d \n", tmp, addr);
     }
-
     spi_wait_ready();
+    close (fd_file);
+    spi_close();
+    spi_cs_close();
+    printf ("write over ... \n");
 
     return 0;
 }
