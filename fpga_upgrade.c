@@ -9,19 +9,19 @@ int spi_setup (void)
     int res, val;
     static uint8_t mode;
     static uint8_t bits = 8;
-    static uint32_t speed = 10000000;
+    static uint32_t speed = 500000;
 
     fd_mtd = spi_open("/dev/spidev3.1");
     if (fd_mtd < 0)
     {
-        perror ("spi_open");
+        printf ("spi_open is failed.\n");
         return -1;
     }
 
     res = spi_set_mode(mode);
     if (res < 0)
     {
-        perror ("spi_set_mode");
+        printf ("spi_set_mode is failed.\n");
         spi_close ();
         return -1;
     }
@@ -29,7 +29,7 @@ int spi_setup (void)
     res = spi_set_bits(bits);
     if (res < 0)
     {
-        perror ("spi_set_bits");
+        printf ("spi_set_bits is failed. \n");
         spi_close ();
         return -1;
     }
@@ -37,15 +37,15 @@ int spi_setup (void)
     res = spi_set_speed(speed);
     if (res < 0)
     {
-        perror ("spi_set_speed");
+        printf ("spi_set_speed is failed. \n");
         spi_close ();
         return -1;
     }
 
-    fd_tt = spi_cs_open("/dev/tt");
+    fd_tt = spi_cs_open("/dev/gpiodrv");
     if (fd_tt < 0)
     {
-        perror ("spi_cs_open");
+        printf ("spi_cs_open is failed. \n");
         return -1;
     }
 
@@ -69,12 +69,7 @@ int file_operate (const char *path, size_t *size)
         return -1;
     }
     *size = lseek(fd, 0, SEEK_END);
-    if (NULL == size)
-    {
-        spi_close ();
-        close (fd);
-        return -1;
-    }
+
     lseek(fd, 0, SEEK_SET);
 
     return fd;
@@ -113,7 +108,7 @@ int main (int argc, char *argv[])
     fd_file = file_operate (argv[1], &size);
     if (fd_file < 0)
     {
-        perror ("file_operate");
+        printf ("file_operate is failed. \n");
         return -1;
     }
 
@@ -159,7 +154,7 @@ loop:
         res = spi_write(addr, buff, res);
         addr += res;
         tmp  -= res;
-    //    printf ("tmp = %d, addr = %d \n", tmp, addr);
+        printf ("tmp = %d, addr = %d \n", tmp, addr);
     }
     while (tmp % SIZE != 0)
     {
@@ -175,7 +170,7 @@ loop:
         res = spi_write(addr, buff, res);
         addr += res;
         tmp  -= res;
-    //    printf ("tmp = %d, addr = %d \n", tmp, addr);
+        printf ("tmp = %d, addr = %d \n", tmp, addr);
     }
     spi_wait_ready();
 
@@ -201,13 +196,13 @@ loop:
         }
         tmp -= res;
         addr += res;
-//        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
+        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
     }
-    while (size % CHECK_SIZE)
+    while (tmp % CHECK_SIZE)
     {
         memset (read_data, 0, CHECK_SIZE);
         memset (file_data, 0, CHECK_SIZE);
-        res = spi_read(addr, read_data, size % CHECK_SIZE);
+        res = spi_read(addr, read_data, tmp % CHECK_SIZE);
 
         lseek (fd_file, addr, SEEK_SET);
         read (fd_file, file_data, res);
@@ -215,9 +210,9 @@ loop:
         {
             goto loop;
         }
-        size -= res;
+        tmp -= res;
         addr += res;
-//        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
+        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
     }
     printf ("Ok ... \n");
 

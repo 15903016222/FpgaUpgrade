@@ -57,7 +57,7 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
 
     switch (cmd) {
         case GPIO109_HIGH:
-            printk ("set gpio109 led on \n");
+ //           printk ("set gpio109 led on \n");
             data = (unsigned int)ioremap (CONTROL_PADCONF_CAM_D9, 4);
             *(unsigned int *)data &= 0xffff;
             *(unsigned int *)data |= 1 << 18;
@@ -95,25 +95,25 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
             break;
 
         case GPIO99_HIGH:
-            printk ("set gpio99 1 \n");
+//            printk ("set gpio99 1 \n");
             data = (unsigned int)ioremap (0x48002114, 4);
             *(unsigned int *)data = 1 << 18 | 1 << 19 | 1 << 20;
             iounmap ((void *)data);
             data = 0;
-            printk ("gpio99 is set 1 over ... \n");
+//            printk ("gpio99 is set 1 over ... \n");
             break;
 
         case GPIO99_LOW:
-            printk ("set gpio99 0 \n");
+//            printk ("set gpio99 0 \n");
             data = (unsigned int)ioremap (0x48002114, 4);
             *(unsigned int *)data &= ~(1 << 18 | 1 << 19 | 1 << 20);
             iounmap ((void *)data);
             data = 0;
-            printk ("gpio99 is set 0 over ... \n");
+//            printk ("gpio99 is set 0 over ... \n");
             break;
 
         case GPIO21_HIGH:
-            printk ("set gpio21 1 \n");
+ //           printk ("set gpio21 1 \n");
             data = (unsigned int)ioremap (CONTROL_PADCONF_ETK_D6, 4);
             *(unsigned int *)data &= 0xffff;
             *(unsigned int *)data |= 1 << 18;
@@ -127,7 +127,7 @@ static long gpio_ioctl (struct file* file, unsigned int cmd, unsigned long arg)
             break;
 
         case GPIO21_LOW:
-            printk ("set gpio21 0 \n");
+//            printk ("set gpio21 0 \n");
             data = (unsigned int)ioremap (GPIO1_DATAOUT, 4);
             *((unsigned int *)data) &= ~(1 << 21);
             iounmap ((void *)data);
