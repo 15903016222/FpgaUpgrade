@@ -86,7 +86,7 @@ void spi_wait_ready (void)
         }
         else
         {
-            printf ("spi is busy ... \n");
+ //           printf ("spi is busy ... \n");
             sleep (1);
             continue;
         }
@@ -131,9 +131,9 @@ int main (int argc, char *argv[])
     spi_wait_ready();
     // BE
     spi_be();
-    printf ("file size is %d \n", size);
+//    printf ("file size is %d \n", size);
     spi_wait_ready();
-    printf ("spi_be is over ... \n");
+//    printf ("spi_be is over ... \n");
 
     tmp = size;
     while (tmp / SIZE)
@@ -153,7 +153,7 @@ int main (int argc, char *argv[])
         res = spi_write(addr, buff, res);
         addr += res;
         tmp  -= res;
-        printf ("tmp = %d, addr = %d \n", tmp, addr);
+//        printf ("tmp = %d, addr = %d \n", tmp, addr);
     }
     while (tmp % SIZE != 0)
     {
@@ -169,12 +169,12 @@ int main (int argc, char *argv[])
         res = spi_write(addr, buff, res);
         addr += res;
         tmp  -= res;
-        printf ("tmp = %d, addr = %d \n", tmp, addr);
+//        printf ("tmp = %d, addr = %d \n", tmp, addr);
     }
     spi_wait_ready();
 
     // check
-    printf ("Start check ... \n");
+//    printf ("Start check ... \n");
     lseek (fd_file, 0, SEEK_SET);
 
     char read_data[CHECK_SIZE] = {0};
@@ -196,7 +196,7 @@ int main (int argc, char *argv[])
         }
         tmp -= res;
         addr += res;
-        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
+//        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
     }
     while (tmp % CHECK_SIZE)
     {
@@ -213,9 +213,9 @@ int main (int argc, char *argv[])
         }
         tmp -= res;
         addr += res;
-        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
+//        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
     }
-    printf ("Ok ... \n");
+//    printf ("Ok ... \n");
 
     close (fd_file);
     spi_close();
