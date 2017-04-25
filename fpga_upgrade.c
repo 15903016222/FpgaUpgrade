@@ -42,10 +42,10 @@ int spi_setup (void)
         return -1;
     }
 
-    fd_tt = spi_cs_open("/dev/gpiodrv");
+    fd_tt = spi_cs_open("/dev/tt");
     if (fd_tt < 0)
     {
-        printf ("open \"/dev/gpiodrv\" is failed. \n");
+        printf ("open \"/dev/tt\" is failed. \n");
         return -1;
     }
 
@@ -128,7 +128,6 @@ int main (int argc, char *argv[])
     spi_rdsr(&status);
     printf ("RDSR: status = %.2x \n", status);
 
-loop:
     spi_wait_ready();
     // BE
     spi_be();
@@ -192,7 +191,8 @@ loop:
         read (fd_file, file_data, res);
         if (memcmp(file_data, read_data, CHECK_SIZE))
         {
-            goto loop;
+            printf ("Write error.\n");
+            return -1;
         }
         tmp -= res;
         addr += res;
@@ -208,7 +208,8 @@ loop:
         read (fd_file, file_data, res);
         if (memcmp(file_data, read_data, CHECK_SIZE))
         {
-            goto loop;
+            printf ("Write error");
+            return -1;
         }
         tmp -= res;
         addr += res;
