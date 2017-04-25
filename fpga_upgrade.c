@@ -45,7 +45,7 @@ int spi_setup (void)
     fd_tt = spi_cs_open("/dev/gpiodrv");
     if (fd_tt < 0)
     {
-        printf ("spi_cs_open is failed. \n");
+        printf ("open \"/dev/gpiodrv\" is failed. \n");
         return -1;
     }
 
