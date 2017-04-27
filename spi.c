@@ -318,19 +318,20 @@ int  spi_read (unsigned int address, char *data, size_t size)
     {
         return -1;
     }
-
     // H8
     addr = (address & 0x00ffffff) >> 16;
     if ((res = write (fd_spi, &addr, 1)) < 0)
     {
         return -1;
     }
+
     // M8
     addr = (address & 0x0000ffff) >> 8;
     if ((res = write (fd_spi, &addr, 1)) < 0)
     {
         return -1;
     }
+
     // L8
     addr = address & 0x000000ff;
     if ((res = write (fd_spi, &addr, 1)) < 0)
@@ -368,14 +369,12 @@ int  spi_pp (unsigned int address, char *data, size_t size)
     {
         return -1;
     }
-
     // H8
     addr = address >> 16;
     if ((res = write (fd_spi, &addr, sizeof (addr))) < 0)
     {
         return -1;
     }
-
     // M8
     addr = address >> 8;
     if ((res = write (fd_spi, &addr, sizeof (addr))) < 0)
@@ -394,7 +393,8 @@ int  spi_pp (unsigned int address, char *data, size_t size)
     {
         return -1;
     }
-    spi_cs_high();
+     spi_cs_high();
+
 
     return res;
 }
