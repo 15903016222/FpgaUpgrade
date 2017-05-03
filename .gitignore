@@ -119,4 +119,3 @@ all.config
 *.sh
 one*
 fpga_upgrade
-Makefile
