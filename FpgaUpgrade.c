@@ -3,7 +3,7 @@
 #define CHECK_SIZE  (4096)
 #define SIZE        (CHECK_SIZE * 32)
 
-#define SOFTWARE_SIZE 0x01000000
+#define SOFTWARE_SIZE (16 * 1024 * 1024)
 #define SOFTWARE_OFFSET 0xa2
 
 int spi_setup (void)
@@ -12,7 +12,7 @@ int spi_setup (void)
     int res, val;
     static uint8_t mode;
     static uint8_t bits = 8;
-    static uint32_t speed = 500000;
+//    static uint32_t speed = 500000;
 
     fd_mtd = spi_open("/dev/spidev3.1");
     if (fd_mtd < 0)
@@ -37,14 +37,14 @@ int spi_setup (void)
         return -1;
     }
 
-    res = spi_set_speed(speed);
+/*    res = spi_set_speed(speed);
     if (res < 0)
     {
         printf ("spi_set_speed is failed. \n");
         spi_close ();
         return -1;
     }
-
+*/
     fd_tt = spi_cs_open("/dev/tt");
     if (fd_tt < 0)
     {
@@ -89,7 +89,7 @@ void spi_wait_ready (void)
         }
         else
         {
-//            printf ("spi is busy ... \n");
+            printf ("spi is busy ... \n");
             sleep (1);
             continue;
         }
@@ -117,7 +117,9 @@ int main (int argc, char *argv[])
     int i, res, tmp;
     unsigned int addr = 0;
     size_t size = 0;
-    unsigned char buff[SIZE] = {0,};
+
+	time_t rawtime;
+	struct tm *timeinfo;
 
     if (argc < 2)
     {
@@ -147,6 +149,11 @@ int main (int argc, char *argv[])
     // RDSR
     unsigned char status;
     spi_rdsr(&status);
+
+	time (&rawtime);
+	timeinfo = localtime (&rawtime);
+	printf ("system time : %s \n", asctime (timeinfo));
+
     printf ("Start upgrading fpga ... \n");
 
     spi_wait_ready();
@@ -159,117 +166,118 @@ int main (int argc, char *argv[])
     tmp = SOFTWARE_SIZE;
     lseek (fd_file, SOFTWARE_OFFSET, SEEK_SET);
 
-    while (tmp / SIZE)
+	char *buff = malloc (SOFTWARE_SIZE);
+    if (NULL == buff)
     {
-        memset (buff, 0, SIZE);
-        // read file
-        if ((res = read (fd_file, buff, SIZE)) < 0)
+		perror ("malloc");
+        goto err2;
+    }
+	memset (buff, 0, SOFTWARE_SIZE);
+    tmp = 0;
+	while (tmp != SOFTWARE_SIZE)
+    {
+        res = read (fd_file, buff + tmp, SOFTWARE_SIZE);
+        if (res < 0)
         {
-            perror ("read");
-            close (fd_file);
-            spi_close ();
-            spi_cs_close ();
-            return -1;
+             goto err1;
         }
+        tmp += res;
+        printf ("read file tmp = %x \n", tmp);
+    }
 
-        for (i = 0; i < SIZE; i++)
-        {
-            buff[i] = convert (buff[i]);
-        }
-
-        // write to flash
+	// byte convert
+    for (i = 0; i < SOFTWARE_SIZE; i++)
+    {
+        buff[i] = convert (buff[i]);
+    }
+	
+	// write to spi flash
+	addr = 0;    
+	while (addr < SOFTWARE_SIZE)
+    {
         spi_wait_ready();
-        res = spi_write(addr, buff, res);
+        if ((SOFTWARE_SIZE - addr) < SIZE)
+        {
+            res = spi_write(addr, buff + addr, SOFTWARE_SIZE - addr);
+            if (res < 0)
+            {
+                 goto err1;
+            }
+        }
+        else 
+        {
+            res = spi_write(addr, buff + addr, SIZE);
+            if (res < 0)
+            {
+                 goto err1;
+            }
+        }
+
         addr += res;
-        tmp  -= res;
-//        printf ("tmp = %d, addr = %d \n", tmp, addr);
+//        printf ("write flash addr = %x\n", addr);
     }
-    while (tmp % SIZE != 0)
+	
+	time (&rawtime);
+	timeinfo = localtime (&rawtime);
+	printf ("system time : %s \n", asctime (timeinfo));
+    
+    printf ("Start check ... \n");
+	char *buff1 = malloc (SOFTWARE_SIZE);
+    if (NULL == buff1)
     {
-        memset (buff, 0, SIZE);
-        // read file
-        if ((res = read (fd_file, buff, tmp % SIZE)) < 0)
-        {
-            perror ("read");
-            close (fd_file);
-            spi_close ();
-            spi_cs_close ();
-            return -1;
-        }
-
-        for (i = 0; i < SIZE; i++)
-        {
-            buff[i] = convert (buff[i]);
-        }
-
-        // write to flash
-        spi_wait_ready();
-        res = spi_write(addr, buff, res);
-        addr += res;
-        tmp  -= res;
-//        printf ("tmp = %d, addr = %d \n", tmp, addr);
+         perror ("malloc");
+         goto err1;
     }
-    spi_wait_ready();
+	memset (buff1, 0, SOFTWARE_SIZE);
 
-    // check
-    printf ("Start checking fpga ... \n");
-    lseek (fd_file, SOFTWARE_OFFSET, SEEK_SET);
-
-    unsigned char read_data[CHECK_SIZE] = {0}; // read flash buff
-    unsigned char file_data[CHECK_SIZE] = {0}; // read file  buff
-
-    addr = 0;
-    tmp = SOFTWARE_SIZE;
-    while (tmp / CHECK_SIZE)
+	addr = 0;
+    while (addr < SOFTWARE_SIZE)
     {
-        memset (read_data, 0, CHECK_SIZE);
-        memset (file_data, 0, CHECK_SIZE);
-        res = spi_read(addr, read_data, sizeof (read_data));
-
-        read (fd_file, file_data, res);
-
-        for (i = 0; i < CHECK_SIZE; i++)
+        if ((SOFTWARE_SIZE - addr) < CHECK_SIZE)
         {
-            read_data[i] = convert(read_data[i]);
+            res = spi_read(addr, buff1 + addr, SOFTWARE_SIZE - addr);
+            if (res < 0)
+            {
+                 goto err;
+            } 
         }
-
-        if (memcmp(file_data, read_data, CHECK_SIZE))
+        else 
         {
-            printf ("Write error.\n");
-            return -1;
+	        res = spi_read(addr, buff1 + addr, CHECK_SIZE);
+            if (res < 0)
+            {
+                goto err;
+            }
         }
-
-        tmp -= res;
         addr += res;
-//        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
+//        printf ("write flash addr = %x\n", addr);
     }
-    while (tmp % CHECK_SIZE)
+
+    if (memcmp (buff, buff1, SOFTWARE_SIZE))
     {
-        memset (read_data, 0, CHECK_SIZE);
-        memset (file_data, 0, CHECK_SIZE);
-        res = spi_read(addr, read_data, tmp % CHECK_SIZE);
-
-        read (fd_file, file_data, res);
-
-        for (i = 0; i < CHECK_SIZE; i++)
-        {
-            read_data[i] = convert(read_data[i]);
-        }
-
-        if (memcmp(file_data, read_data, CHECK_SIZE))
-        {
-            printf ("Write error");
-            return -1;
-        }
-        tmp -= res;
-        addr += res;
-//        printf ("res = %d tmp = %d, addr = %d \n", res, tmp, addr);
+         printf ("Check failed ... \n");
+         goto err;
     }
+
+	time (&rawtime);
+	timeinfo = localtime (&rawtime);
+	printf ("system time : %s \n", asctime (timeinfo));
+
     printf ("Ok! \n");
-
+	free (buff1);
+	free (buff);
     close (fd_file);
     spi_close();
     spi_cs_close();
-
     return 0;
+
+err:
+	free (buff1);
+err1:
+	free (buff);
+err2:
+    close (fd_file);
+    spi_close();
+    spi_cs_close();
+	return -1;
 }
