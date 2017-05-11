@@ -89,7 +89,7 @@ void spi_wait_ready (void)
         }
         else
         {
-            printf ("spi is busy ... \n");
+//            printf ("spi is busy ... \n");
             sleep (1);
             continue;
         }
@@ -117,9 +117,6 @@ int main (int argc, char *argv[])
     int i, res, tmp;
     unsigned int addr = 0;
     size_t size = 0;
-
-	time_t rawtime;
-	struct tm *timeinfo;
 
     if (argc < 2)
     {
@@ -150,10 +147,6 @@ int main (int argc, char *argv[])
     unsigned char status;
     spi_rdsr(&status);
 
-	time (&rawtime);
-	timeinfo = localtime (&rawtime);
-	printf ("system time : %s \n", asctime (timeinfo));
-
     printf ("Start upgrading fpga ... \n");
 
     spi_wait_ready();
@@ -163,7 +156,11 @@ int main (int argc, char *argv[])
     spi_wait_ready();
 //    printf ("spi_be is over ... \n");
 
-    tmp = SOFTWARE_SIZE;
+    if (lseek (fd_file, 0, SEEK_END) < (0x1000000 + 0xa2))
+    {
+		return -1;
+    }
+	
     lseek (fd_file, SOFTWARE_OFFSET, SEEK_SET);
 
 	char *buff = malloc (SOFTWARE_SIZE);
@@ -182,7 +179,7 @@ int main (int argc, char *argv[])
              goto err1;
         }
         tmp += res;
-        printf ("read file tmp = %x \n", tmp);
+//        printf ("read file tmp = %x \n", tmp);
     }
 
 	// byte convert
@@ -217,10 +214,6 @@ int main (int argc, char *argv[])
 //        printf ("write flash addr = %x\n", addr);
     }
 	
-	time (&rawtime);
-	timeinfo = localtime (&rawtime);
-	printf ("system time : %s \n", asctime (timeinfo));
-    
     printf ("Start check ... \n");
 	char *buff1 = malloc (SOFTWARE_SIZE);
     if (NULL == buff1)
@@ -258,10 +251,6 @@ int main (int argc, char *argv[])
          printf ("Check failed ... \n");
          goto err;
     }
-
-	time (&rawtime);
-	timeinfo = localtime (&rawtime);
-	printf ("system time : %s \n", asctime (timeinfo));
 
     printf ("Ok! \n");
 	free (buff1);
