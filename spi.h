@@ -20,6 +20,8 @@
 #include <sys/ioctl.h>
 #include <linux/types.h>
 #include <linux/spi/spidev.h>
+#include <termios.h>
+#include <time.h>
 
 #define WREN    0x06
 #define WRDI    0x04
@@ -32,10 +34,10 @@
 #define BE      0xc7
 #define RES     0xab
 
-#define GPIO99_LOW      0x6004
-#define GPIO99_HIGH		0x6005
-#define GPIO21_LOW      0x6006
-#define GPIO21_HIGH     0x6007
+#define GPIO99_VOLTAGE_SELECT_PIN_LOW      0x6004
+#define GPIO99_VOLTAGE_SELECT_PIN_HIGH		0x6005
+#define GPIO21_CS_LOW      0x6006
+#define GPIO21_CS_HIGH     0x6007
 
 extern int fd_spi, fd_cs;
 

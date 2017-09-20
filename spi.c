@@ -2,18 +2,6 @@
 
 int fd_spi, fd_cs;
 
-void delay (int m)
-{
-    int i, j;
-    for (i = 0; i < m; ++i)
-    {
-        for (j = 0; j < 10000; ++j)
-        {
-            ;
-        }
-    }
-}
-
 int  spi_open (const char *path)
 {
     if (NULL == path)
@@ -68,10 +56,12 @@ int  spi_set_speed (uint32_t speed)
 
     if ((res = ioctl(fd_spi, SPI_IOC_WR_MAX_SPEED_HZ, &speed)) < 0)
     {
+		printf ("[%s]:%d, set WR speed error... \n", __func__, __LINE__);
         return -1;
     }
     if ((res = ioctl(fd_spi, SPI_IOC_RD_MAX_SPEED_HZ, &speed)) < 0)
     {
+		printf ("[%s]:%d, set RD speed error.. \n", __func__, __LINE__);
         return -1;
     }
 
@@ -108,10 +98,12 @@ int spi_cs_high (void)
 
     int val, res;
 
-    if ((res = ioctl(fd_cs, GPIO21_HIGH, &val)) < 0)
+    if ((res = ioctl(fd_cs, GPIO21_CS_HIGH, &val)) < 0)
     {
         return -1;
     }
+
+    usleep(10000);
 
     return res;
 }
@@ -126,12 +118,12 @@ int spi_cs_low(void)
     int val, res;
 
     spi_cs_high();
-    delay (2);
-    if ((res = ioctl(fd_cs, GPIO21_LOW, &val)) < 0)
+    if ((res = ioctl(fd_cs, GPIO21_CS_LOW, &val)) < 0)
     {
         return -1;
     }
-
+	
+	usleep(10000);
     return res;
 }
 
@@ -146,19 +138,27 @@ int  spi_rdid (char *id, size_t size)
     {
         return -1;
     }
+    printf ("[%s]:%d, STEP01.. \n", __func__, __LINE__);
 
     int res;
     uint8_t cmd = RDID;
-
+    
+	printf ("[%s]:%d, STEP02, wr CMD: %x\n", __func__, __LINE__, cmd);
     spi_cs_low ();
-    if ((res = (write (fd_spi, &cmd, sizeof (cmd)))) < 0)
+    if ((res = (write (fd_spi, &cmd, sizeof (cmd)))) != 1)
     {
+		printf ("[%s]:%d, ID ERR! return CMD size:%d\n", __func__, __LINE__, res);
         return -1;
     }
-    if ((res = (read (fd_spi, id, size))) < 0)
+    
+    printf ("[%s]:%d, STEP03.., fd_spi:%d, size:%d \n", __func__, __LINE__, fd_spi, size);
+    if ((res = (read (fd_spi, id, size))) != size )
     {
+		printf ("[%s]:%d, ID ERR! return ID size:%d\n", __func__, __LINE__, res);
         return -1;
     }
+    
+    printf ("[%s]:%d, STEP04..ID OK \n", __func__, __LINE__);
     spi_cs_high();
 
     return res;
@@ -205,7 +205,7 @@ int  spi_wren (void)
         return -1;
     }
     spi_cs_high();
-
+	spi_is_busy();
     return res;
 }
 

@@ -67,7 +67,7 @@ void spi_wait_ready (void)
         else
         {
 //            printf ("spi is busy ... \n");
-            sleep (1);
+            usleep (100000);
             continue;
         }
     }
