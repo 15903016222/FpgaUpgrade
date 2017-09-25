@@ -33,7 +33,7 @@ int set_IO_converter(int fd, int vol18Or33)
 	}
 	printf ("[%s]:%d, set GPIO 99: %d!\n", __func__, __LINE__, vol18Or33);
 	
-    usleep(10000);
+    usleep(50000);
     
     return 	vol18Or33;
 }
@@ -104,9 +104,9 @@ int spi_setup_and_open_ttdev (void)
         printf ("open \"/dev/tt\" is failed. \n");
         return -1;
     }
-	ioctl(gFdTT, GPIO99_VOLTAGE_SELECT_PIN_HIGH, &val);
+	
 	set_IO_converter(gFdTT, 1);
-	ioctl(gFdTT, GPIO99_VOLTAGE_SELECT_PIN_HIGH, &val);
+
 	printf ("[%s]:%d setup SPI ok, gFDTT:%d \n", __func__, __LINE__, gFdTT);
     return 0;
 }
@@ -145,7 +145,7 @@ void spi_wait_ready (void)
         else
         {
             //printf ("spi is busy ... \n");
-            usleep (10000);
+            usleep (200000);
             continue;
         }
     }
@@ -330,7 +330,7 @@ int read_all_spi_flash(char *dst_buff, int size)
     return 0;
 }
 
-
+/*
 int memcpy_by_block(char *buff, char *buff1, int size)
 {
 	///////////////////// linux比较内存函数， liux spi flash 操作 ////////////////////////
@@ -426,6 +426,7 @@ int memcpy_by_block(char *buff, char *buff1, int size)
 	}
 	return 0;
 }
+*/
 
 /* fd_file: file descriptor
  * dst_buf: the dest buffer to read from file;
@@ -514,7 +515,8 @@ int main (int argc, char *argv[])
 	
 	if( read_all_spi_flash(buff1, DEF_SOFTWARE_SIZE) != 0 ){ goto error_label; }
 	
-	if( memcpy_by_block(buff, buff1, DEF_SOFTWARE_SIZE) != 0) { goto error_label; }
+	//if( memcpy_by_block(buff, buff1, DEF_SOFTWARE_SIZE) != 0) { goto error_label; }
+	if( memcmp(buff, buff1, DEF_SOFTWARE_SIZE) != 0) { goto error_label; }
 
 //------------------- fininsed spi operation, deal with result  --------------------//	
 	set_IO_converter(gFdTT, 0); 

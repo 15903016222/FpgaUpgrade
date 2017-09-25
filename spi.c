@@ -103,7 +103,7 @@ int spi_cs_high (void)
         return -1;
     }
 
-    usleep(10000);
+    usleep(1000);
 
     return res;
 }
@@ -123,7 +123,7 @@ int spi_cs_low(void)
         return -1;
     }
 	
-	usleep(10000);
+	usleep(1000);
     return res;
 }
 
